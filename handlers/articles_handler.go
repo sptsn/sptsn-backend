@@ -2,67 +2,12 @@ package handlers
 
 import (
   "net/http"
-  "os"
   "fmt"
   "net/url"
   "encoding/json"
   "bytes"
+	"github.com/sptsn/sptsn-backend/elastic"
 )
-
-type ElasticResponse struct {
-  Took     int  `json:"took"`
-  TimedOut bool `json:"timed_out"`
-  Shards   struct {
-  } `json:"_shards"`
-  Hits struct {
-    Total struct {
-    } `json:"total"`
-    MaxScore float32 `json:"max_score"`
-    Hits     []struct {
-      Index  string `json:"_index"`
-      ID     string `json:"_id"`
-      Score  float32    `json:"_score"`
-      Source struct {
-        Title       string   `json:"title"`
-        Description string   `json:"description"`
-        Date        string   `json:"date"`
-        Slug        string   `json:"slug"`
-        Rewritten   bool     `json:"rewritten"`
-        Content     string   `json:"content"`
-        Tags        []string `json:"tags"`
-      } `json:"_source"`
-    } `json:"hits"`
-  } `json:"hits"`
-}
-
-type Article struct {
-  ID          string `json:"id"`
-  Title       string `json:"title"`
-  Description string `json:"description"`
-  Date        string  `json:"date"`
-  Slug        string  `json:"slug"`
-  Rewritten   bool    `json:"rewritten"`
-  Content     string  `json:"content"`
-  Tags        []string `json:"tags"`
-}
-
-type MultiMatch struct {
-  Query string `json:"query"`
-  Fields []string `json:"fields"`
-}
-
-type Query struct {
-  MultiMatch MultiMatch `json:"multi_match"`
-}
-
-type ElasicParams struct {
-  Source []string `json:"_source"`
-  Sort map[string]string `json:"sort"`
-  Query *Query `json:"query,omitempty"`
-}
-
-// const baseUrl = "https://sptsn.ru/elastic"
-const baseUrl = "http://localhost:9200"
 
 func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   u, err := url.Parse(r.URL.String())
@@ -73,13 +18,13 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   query := u.Query().Get("q")
-  data := ElasicParams {
+  data := elastic.ElasticParams {
     Source: []string{"title", "slug", "date", "description", "tags"},
     Sort: map[string]string{"date": "desc"},
   }
   if query != "" {
-    data.Query = &Query {
-      MultiMatch: MultiMatch{
+    data.Query = &elastic.Query {
+      MultiMatch: elastic.MultiMatch{
         Query: query,
         Fields: []string{"content"},
       },
@@ -87,7 +32,7 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   json_data, _ := json.Marshal(data)
-  resp, err := http.Post(baseUrl + "/articles/_search", "application/json", bytes.NewBuffer(json_data))
+  resp, err := http.Post(elastic.BaseUrl + "/articles/_search", "application/json", bytes.NewBuffer(json_data))
 
   if err != nil {
     fmt.Println(err)
@@ -109,9 +54,9 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   hits := elasticResponse.Hits.Hits
-  var output = make([]Article, 0)
+  var output = make([]elastic.Article, 0)
   for _, hit := range hits {
-    output = append(output, Article {
+    output = append(output, elastic.Article {
       ID: hit.ID,
       Title: hit.Source.Title,
       Description: hit.Source.Description,

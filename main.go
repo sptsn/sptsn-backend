@@ -2,7 +2,8 @@ package main
 
 import (
   "net/http"
-  handlers "github.com/sptsn/sptsn-backend/handlers/articles_handler"
+  "os"
+  "github.com/sptsn/sptsn-backend/handlers"
 )
 
 func main() {
