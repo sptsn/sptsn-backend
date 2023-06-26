@@ -17,6 +17,20 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   query := u.Query().Get("q")
+	data := buildSearchParams(query)
+	articles, err := elastic.Client(data)
+	if err != nil {
+    fmt.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOK)
+  json.NewEncoder(w).Encode(articles)
+}
+
+func buildSearchParams(query string) elastic.SearchParams {
   data := elastic.SearchParams {
     Source: []string{"title", "slug", "date", "description", "tags"},
     Sort: map[string]string{"date": "desc"},
@@ -29,21 +43,5 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
       },
     }
   }
-
-	elasticResponse, err := elastic.Client(data)
-	if err != nil {
-    fmt.Println(err)
-    w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-  hits := elasticResponse.Hits.Hits
-  var output = make([]elastic.Article, 0)
-  for _, hit := range hits {
-    output = append(output, elastic.BuildArticle(hit))
-  }
-
-  w.Header().Set("Content-Type", "application/json")
-  w.WriteHeader(http.StatusCreated)
-  json.NewEncoder(w).Encode(output)
+	return data
 }

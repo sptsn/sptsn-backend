@@ -12,26 +12,24 @@ func SlugHandler(w http.ResponseWriter, r *http.Request) {
 	s := strings.Split(r.URL.Path, "/")
 	var slug string = s[len(s) - 1]
 
-	data := elastic.SearchParams{}
-	data.Query = &elastic.Query{
-		Match: map[string]string{"slug": slug},
+	data := elastic.SearchParams{
+		Query: &elastic.Query{
+			Match: map[string]string{"slug": slug},
+		},
 	}
 
-	elasticResponse, err := elastic.Client(data)
+	articles, err := elastic.Client(data)
 	if err != nil {
     fmt.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-  hits := elasticResponse.Hits.Hits
-
 	w.Header().Set("Content-Type", "application/json")
-  w.WriteHeader(http.StatusCreated)
+  w.WriteHeader(http.StatusOK)
 
-	if len(hits) > 0 {
-		article := elastic.BuildArticle(hits[0])
-		json.NewEncoder(w).Encode(article)
+	if len(articles) > 0 {
+		json.NewEncoder(w).Encode(articles[0])
 	} else {
 		json.NewEncoder(w).Encode(map[string]string{})
 	}

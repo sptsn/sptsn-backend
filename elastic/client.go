@@ -7,7 +7,7 @@ import(
   "bytes"
 )
 
-func Client(data SearchParams) (*ElasticResponse, error) {
+func Client(data SearchParams) ([]Article, error) {
 	json_data, _ := json.Marshal(data)
   resp, err := http.Post(BaseUrl + "/articles/_search", "application/json", bytes.NewBuffer(json_data))
 
@@ -27,10 +27,15 @@ func Client(data SearchParams) (*ElasticResponse, error) {
     return nil, err
   }
 
-	return elasticResponse, nil
+	var articles = make([]Article, 0)
+	for _, hit := range elasticResponse.Hits.Hits {
+    articles = append(articles, buildArticle(hit))
+  }
+
+	return articles, nil
 }
 
-func BuildArticle(hit Hit) Article {
+func buildArticle(hit Hit) Article {
 	return Article {
 		ID: hit.ID,
 		Title: hit.Source.Title,
