@@ -18,13 +18,13 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   query := u.Query().Get("q")
-  data := elastic.ElasticParams {
+  data := elastic.SearchParams {
     Source: []string{"title", "slug", "date", "description", "tags"},
     Sort: map[string]string{"date": "desc"},
   }
   if query != "" {
     data.Query = &elastic.Query {
-      MultiMatch: elastic.MultiMatch{
+      MultiMatch: &elastic.MultiMatch{
         Query: query,
         Fields: []string{"content"},
       },
@@ -45,7 +45,7 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  elasticResponse := &ElasticResponse{}
+  elasticResponse := &elastic.ElasticResponse{}
   err = json.NewDecoder(resp.Body).Decode(&elasticResponse)
   if err != nil {
     w.WriteHeader(http.StatusInternalServerError)

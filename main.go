@@ -15,5 +15,7 @@ func main() {
   mux := http.NewServeMux()
 
   mux.HandleFunc("/articles", handlers.ArticlesHandler)
+  mux.HandleFunc("/articles/", handlers.SlugHandler)
+
   http.ListenAndServe(":"+port, mux)
 }

@@ -43,12 +43,13 @@ type MultiMatch struct {
 }
 
 type Query struct {
-  MultiMatch MultiMatch `json:"multi_match"`
+  MultiMatch *MultiMatch `json:"multi_match,omitempty"`
+  Match map[string]string `json:"match,omitempty"`
 }
 
-type ElasticParams struct {
-  Source []string `json:"_source"`
-  Sort map[string]string `json:"sort"`
+type SearchParams struct {
+  Source []string `json:"_source,omitempty"`
+  Sort map[string]string `json:"sort,omitempty"`
   Query *Query `json:"query,omitempty"`
 }
 
