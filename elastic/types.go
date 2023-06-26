@@ -1,5 +1,20 @@
 package elastic
 
+type Hit struct {
+  Index  string `json:"_index"`
+  ID     string `json:"_id"`
+  Score  float32    `json:"_score"`
+  Source struct {
+    Title       string   `json:"title"`
+    Description string   `json:"description"`
+    Date        string   `json:"date"`
+    Slug        string   `json:"slug"`
+    Rewritten   bool     `json:"rewritten"`
+    Content     string   `json:"content"`
+    Tags        []string `json:"tags"`
+  } `json:"_source"`
+}
+
 type ElasticResponse struct {
   Took     int  `json:"took"`
   TimedOut bool `json:"timed_out"`
@@ -9,20 +24,7 @@ type ElasticResponse struct {
     Total struct {
     } `json:"total"`
     MaxScore float32 `json:"max_score"`
-    Hits     []struct {
-      Index  string `json:"_index"`
-      ID     string `json:"_id"`
-      Score  float32    `json:"_score"`
-      Source struct {
-        Title       string   `json:"title"`
-        Description string   `json:"description"`
-        Date        string   `json:"date"`
-        Slug        string   `json:"slug"`
-        Rewritten   bool     `json:"rewritten"`
-        Content     string   `json:"content"`
-        Tags        []string `json:"tags"`
-      } `json:"_source"`
-    } `json:"hits"`
+    Hits     []Hit `json:"hits"`
   } `json:"hits"`
 }
 

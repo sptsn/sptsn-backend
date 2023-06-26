@@ -5,8 +5,6 @@ import (
   "encoding/json"
 	"strings"
 	"fmt"
-	"bytes"
-	"io"
 	"github.com/sptsn/sptsn-backend/elastic"
 )
 
@@ -18,31 +16,13 @@ func SlugHandler(w http.ResponseWriter, r *http.Request) {
 	data.Query = &elastic.Query{
 		Match: map[string]string{"slug": slug},
 	}
-  json_data, _ := json.Marshal(data)
-  resp, err := http.Post(elastic.BaseUrl + "/articles/_search", "application/json", bytes.NewBuffer(json_data))
 
+	elasticResponse, err := elastic.Client(data)
 	if err != nil {
     fmt.Println(err)
-  }
-
-  defer resp.Body.Close()
-
-  if resp.StatusCode != 200 {
     w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(resp.StatusCode)
-		bodyBytes, _ := io.ReadAll(resp.Body)
-    bodyString := string(bodyBytes)
-    fmt.Println(bodyString)
-    return
-  }
-
-	elasticResponse := &elastic.ElasticResponse{}
-  err = json.NewDecoder(resp.Body).Decode(&elasticResponse)
-  if err != nil {
-    w.WriteHeader(http.StatusInternalServerError)
-    fmt.Println(err)
-    return
-  }
+		return
+	}
 
   hits := elasticResponse.Hits.Hits
 
@@ -50,17 +30,7 @@ func SlugHandler(w http.ResponseWriter, r *http.Request) {
   w.WriteHeader(http.StatusCreated)
 
 	if len(hits) > 0 {
-		hit := hits[0]
-		article := elastic.Article {
-			ID: hit.ID,
-			Title: hit.Source.Title,
-			Description: hit.Source.Description,
-			Date: hit.Source.Date,
-			Slug: hit.Source.Slug,
-			Rewritten: hit.Source.Rewritten,
-			Tags: hit.Source.Tags,
-			Content: hit.Source.Content,
-		}
+		article := elastic.BuildArticle(hits[0])
 		json.NewEncoder(w).Encode(article)
 	} else {
 		json.NewEncoder(w).Encode(map[string]string{})
