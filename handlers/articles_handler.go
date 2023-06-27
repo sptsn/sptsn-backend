@@ -25,9 +25,14 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response := ApiResponse{
+		Results: articles,
+		Total: len(articles),
+	}
+
   w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(http.StatusOK)
-  json.NewEncoder(w).Encode(articles)
+  json.NewEncoder(w).Encode(response)
 }
 
 func buildSearchParams(query string) elastic.SearchParams {

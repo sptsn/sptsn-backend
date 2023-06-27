@@ -25,12 +25,19 @@ func SlugHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var results []elastic.Article
+	if len(articles) == 0 {
+		results = make([]elastic.Article, 0)
+	} else {
+		results = articles[:1]
+	}
+
+	response := ApiResponse{
+		Results: results,
+		Total: len(results),
+	}
+
 	w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(http.StatusOK)
-
-	if len(articles) > 0 {
-		json.NewEncoder(w).Encode(articles[0])
-	} else {
-		json.NewEncoder(w).Encode(map[string]string{})
-	}
+	json.NewEncoder(w).Encode(response)
 }
