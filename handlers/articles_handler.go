@@ -56,6 +56,7 @@ func buildSearchParams(query string) elastic.SearchParams {
 			Fields: &elastic.Fields {
 				Content: map[string]int{"number_of_fragments": 1},
 			},
+			TagsSchema: "styled",
 		}
   }
 	return data

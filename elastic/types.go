@@ -59,6 +59,7 @@ type Fields struct {
 
 type Highlight struct {
   Fields *Fields `json:"fields"`
+  TagsSchema string `json:"tags_schema"`
 }
 
 type SearchParams struct {
