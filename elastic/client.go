@@ -36,7 +36,7 @@ func Client(data SearchParams) ([]Article, error) {
 }
 
 func buildArticle(hit Hit) Article {
-	return Article {
+	article := Article {
 		ID: hit.ID,
 		Title: hit.Source.Title,
 		Description: hit.Source.Description,
@@ -46,4 +46,9 @@ func buildArticle(hit Hit) Article {
 		Tags: hit.Source.Tags,
 		Content: hit.Source.Content,
 	}
+	fmt.Println(hit)
+	if len(hit.Highlight.Content) > 0 {
+		article.Highlight = hit.Highlight.Content[0]
+	}
+	return article
 }

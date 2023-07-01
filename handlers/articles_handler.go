@@ -5,6 +5,7 @@ import (
   "fmt"
   "net/url"
   "encoding/json"
+	// "time"
 	"github.com/sptsn/sptsn-backend/elastic"
 )
 
@@ -30,7 +31,11 @@ func ArticlesHandler(w http.ResponseWriter, r *http.Request) {
 		Total: len(articles),
 	}
 
+	// time.Sleep(1 * time.Second)
+
   w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
   w.WriteHeader(http.StatusOK)
   json.NewEncoder(w).Encode(response)
 }
@@ -47,6 +52,11 @@ func buildSearchParams(query string) elastic.SearchParams {
         Fields: []string{"content"},
       },
     }
+		data.Highlight = &elastic.Highlight {
+			Fields: &elastic.Fields {
+				Content: map[string]int{"number_of_fragments": 1},
+			},
+		}
   }
 	return data
 }

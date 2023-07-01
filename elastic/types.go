@@ -13,6 +13,9 @@ type Hit struct {
     Content     string   `json:"content"`
     Tags        []string `json:"tags"`
   } `json:"_source"`
+  Highlight struct {
+    Content  []string `json:"content"`
+  } `json:"highlight"`
 }
 
 type ElasticResponse struct {
@@ -37,6 +40,7 @@ type Article struct {
   Rewritten   bool    `json:"rewritten"`
   Content     string  `json:"content"`
   Tags        []string `json:"tags"`
+  Highlight   string `json:"highlight"`
 }
 
 type MultiMatch struct {
@@ -49,10 +53,19 @@ type Query struct {
   Match map[string]string `json:"match,omitempty"`
 }
 
+type Fields struct {
+  Content map[string]int `json:"content"`
+}
+
+type Highlight struct {
+  Fields *Fields `json:"fields"`
+}
+
 type SearchParams struct {
   Source []string `json:"_source,omitempty"`
   Sort map[string]string `json:"sort,omitempty"`
   Query *Query `json:"query,omitempty"`
+  Highlight *Highlight `json:"highlight,omitempty"`
 }
 
 const BaseUrl = "https://sptsn.ru/elastic"
